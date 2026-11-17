@@ -45,6 +45,69 @@ permalinkStore.getSaveLayers = function getSaveLayers(layers, viewer) {
   return saveLayers;
 };
 
+function getWmsSelection(selectedItem) {
+  const layer = selectedItem.getLayer();
+  const feature = selectedItem.getFeature();
+
+  if (
+    !layer
+    || !feature
+    || layer.get('type') !== 'WMS'
+  ) {
+    return null;
+  }
+
+  const coordinate = feature.get(
+    '_origoWmsCoordinate'
+  );
+
+  const projection = feature.get(
+    '_origoWmsProjection'
+  );
+
+  const featureId = feature.getId();
+
+  if (
+    !Array.isArray(coordinate)
+    || coordinate.length !== 2
+    || !projection
+    || featureId === undefined
+    || featureId === null
+  ) {
+    return null;
+  }
+
+  const normalizedCoordinate = [
+    Number(coordinate[0]),
+    Number(coordinate[1])
+  ];
+
+  if (
+    !Number.isFinite(normalizedCoordinate[0])
+    || !Number.isFinite(normalizedCoordinate[1])
+  ) {
+    return null;
+  }
+
+  return {
+    layer: layer.get('name'),
+    featureId: String(featureId),
+    coordinate: normalizedCoordinate,
+    projection
+  };
+}
+
+function getWmsSelections(viewer) {
+  const selectedItems = viewer
+    .getSelectionManager()
+    .getSelectedItems()
+    .getArray();
+
+  return selectedItems
+    .map(getWmsSelection)
+    .filter(selection => selection !== null);
+};
+
 permalinkStore.getState = function getState(viewer, isExtended) {
   const state = {};
   const view = viewer.getMap().getView();
@@ -97,6 +160,14 @@ permalinkStore.getState = function getState(viewer, isExtended) {
         }
       }
     }
+  }
+
+  const wmsSelections = getWmsSelections(viewer);
+
+  if (wmsSelections.length > 0) {
+    state.wmsSelection = JSON.stringify(
+      wmsSelections
+    );
   }
 
   if (getPin()) {

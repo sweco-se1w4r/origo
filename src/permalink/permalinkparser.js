@@ -81,6 +81,35 @@ const feature = function feature(featureId) {
   return featureId;
 };
 
+const wmsSelection = function wmsSelection(
+  wmsSelectionStr
+) {
+  try {
+    const selections = JSON.parse(
+      wmsSelectionStr
+    );
+
+    if (!Array.isArray(selections)) {
+      return [];
+    }
+
+    return selections.filter((selection) => (
+      selection
+      && typeof selection.layer === 'string'
+      && typeof selection.projection === 'string'
+      && Array.isArray(selection.coordinate)
+      && selection.coordinate.length === 2
+    ));
+  } catch (error) {
+    console.warn(
+      'Could not parse wmsSelection:',
+      error
+    );
+
+    return [];
+  }
+};
+
 const pin = function pin(pinStr) {
   return urlparser.strIntify(pinStr);
 };
@@ -132,6 +161,7 @@ export default {
   center,
   selection,
   feature,
+  wmsSelection,
   pin,
   map,
   controls,

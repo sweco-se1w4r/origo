@@ -339,10 +339,28 @@ async function getFeaturesFromRemote(requestOptions, viewer, textHtmlHandler) {
     if (result.status === 'fulfilled' && result.value) {
       const groupLayers = viewer.getGroupLayers();
       const map = viewer.getMap();
-      result.value.forEach((feature) => {
-        const si = createSelectedItem(feature, layer, map, groupLayers);
-        requestResult.push(si);
-      });
+    result.value.forEach((feature) => {
+      if (layer.get('type') === 'WMS') {
+        feature.set(
+          '_origoWmsCoordinate',
+          [...requestOptions.coordinate]
+        );
+
+        feature.set(
+          '_origoWmsProjection',
+          viewer.getProjectionCode()
+        );
+      }
+
+      const si = createSelectedItem(
+        feature,
+        layer,
+        map,
+        groupLayers
+      );
+
+      requestResult.push(si);
+    });
     } else {
       console.warn(`GetFeatureInfo request failed for layer: ${layer.get('name')}`);
     }

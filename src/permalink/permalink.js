@@ -50,6 +50,9 @@ export default (() => ({
         case 'feature':
           urlAsObj.feature = permalinkParser.feature(val);
           break;
+        case 'wmsSelection':
+          urlAsObj.wmsSelection = permalinkParser.wmsSelection(val);
+          break;  
         case 'pin':
           urlAsObj.pin = permalinkParser.pin(val);
           break;
